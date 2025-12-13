@@ -3,7 +3,6 @@ module HyperbolicNumbers
 # --------------------------------------
 # Julia package to support hyperbolic numbers in Julia
 # Created with the support of ChatGPT
-# Info on hyperbolic numbers in Julia is also in https://doi.org/10.48550/arXiv.2301.01707
 #
 # L. Tripodi, EHV, Sat 13 Dec 2025
 # ---------------------------------------
