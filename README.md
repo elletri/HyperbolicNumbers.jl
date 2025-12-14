@@ -1,6 +1,6 @@
 # HyperbolicNumbers.jl
 
-A Julia package for **hyperbolic (split-complex) numbers** of the form
+A Julia package for **hyperbolic (split-complex, perplex or dual) numbers** of the form
 
 [ z = a + b hy, hy^2 = 1 with hy ≠ ±1]
 
@@ -67,7 +67,7 @@ z = Hyperbolic(3, 2)
 ### Hyperbolic unit
 
 ```julia
-h^2 == one(Hyperbolic{Int})
+hy^2 == one(Hyperbolic{Int})
 ```
 
 ### Zero divisors
@@ -167,6 +167,7 @@ Contributions are welcome. Please:
 ## 🙏 Acknowledgements
 
 This package was developed with the assistance of OpenAI's ChatGPT, which was used as a programming and documentation aid during development. All design choices, mathematical interpretations, and any remaining errors are the sole responsibility of the author.
+
 Info on hyperbolic numbers in Julia is also in https://doi.org/10.48550/arXiv.2301.01707
 
 ---
