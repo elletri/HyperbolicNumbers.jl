@@ -1,15 +1,18 @@
 module HyperbolicNumbers
 
 # --------------------------------------
-# Julia package to support hyperbolic numbers in Julia
+# Julia package to support hyperbolic numbers (also known as perplex numbers, split-complex numbers or double numbers)
 # Created with the support of ChatGPT
 #
 # L. Tripodi, EHV, Sat 13 Dec 2025
 # ---------------------------------------
 
+# Changes
+# Added alternative names of the hyperbolic numbers in the title
+# Corrected the visualization function to resemble more the visualization of complex numbers in Julia. 
+# The hyperbolic unit is hy a bit as the imaginary unit is im in Julia
 
-
-export Hyperbolic, h, conj, abs, visualize,
+export Hyperbolic, hy, conj, abs, visualize,
        inv, isunit, islightlike, istimelike, isspacelike,
        lorentz_inner, hyperbolic_angle
 
@@ -18,16 +21,16 @@ using RecipesBase
 """
     Hyperbolic{T<:Real}(a, b)
 
-Represents a **hyperbolic (split-complex) number** of the form
+Represents a **hyperbolic (split-complex, perplex, double) number** of the form
 
 ```
-a + h*b
+a + b*hy
 ```
 
-where `a` and `b` are real numbers and `h` is the *hyperbolic unit* satisfying
+where `a` and `b` are real numbers and `hy` is the *hyperbolic unit* satisfying
 
 ```
-h^2 = 1
+hy^2 = 1
 ```
 
 Hyperbolic numbers form a commutative algebra over the reals and implement
@@ -43,16 +46,25 @@ struct Hyperbolic{T<:Real} <: Number
 end
 
 """
-    h
+    Hyperbolic(a::Real, b::Real)
 
-The **hyperbolic unit**, defined such that `h^2 = 1`.
+Construct a hyperbolic number `a + h*b` with automatic promotion
+of `a` and `b` to the same type.
 """
-const h = Hyperbolic(0, 1)
+Hyperbolic(a::Real, b::Real) = Hyperbolic(promote(a, b)...)
+
+
+"""
+    hy
+
+The **hyperbolic unit**, defined such that `hy^2 = 1`.
+"""
+const hy = Hyperbolic(0, 1)
 
 """
     Hyperbolic(a::Real)
 
-Constructs a purely real hyperbolic number `a + h*0`.
+Constructs a purely real hyperbolic number `a + 0*hy`.
 """
 Hyperbolic(a::Real) = Hyperbolic(a, zero(a))
 
@@ -63,14 +75,14 @@ Hyperbolic(a::Real) = Hyperbolic(a, zero(a))
 """
     zero(::Type{Hyperbolic{T}})
 
-Additive identity `0 + h*0`.
+Additive identity `0 + hy*0`.
 """
 Base.zero(::Type{Hyperbolic{T}}) where T = Hyperbolic(zero(T), zero(T))
 
 """
     one(::Type{Hyperbolic{T}})
 
-Multiplicative identity `1 + h*0`.
+Multiplicative identity `1 + hy*0`.
 """
 Base.one(::Type{Hyperbolic{T}}) where T = Hyperbolic(one(T), zero(T))
 
@@ -101,6 +113,7 @@ Base.iszero(z::Hyperbolic) = iszero(z.a) && iszero(z.b)
 Allows mixed arithmetic with real numbers.
 """
 Base.promote_rule(::Type{Hyperbolic{T}}, ::Type{S}) where {T<:Real,S<:Real} = Hyperbolic{promote_type(T,S)}
+Base.promote_rule(::Type{S}, ::Type{Hyperbolic{T}}) where {T<:Real,S<:Real} = Hyperbolic{promote_type(T,S)}
 
 # ---------------------------------------------------------------------
 # Display and comparison
@@ -109,9 +122,9 @@ Base.promote_rule(::Type{Hyperbolic{T}}, ::Type{S}) where {T<:Real,S<:Real} = Hy
 """
     show(io, z::Hyperbolic)
 
-Pretty-print as `a + h*b`.
+Pretty-print as `a + b*hy`.
 """
-Base.show(io::IO, z::Hyperbolic) = print(io, "$(z.a) + h*$(z.b)")
+Base.show(io::IO, z::Hyperbolic) = print(io, "$(z.a) + $(z.b)hy")
 
 """
     ==(z1::Hyperbolic, z2::Hyperbolic)
@@ -148,7 +161,7 @@ Base.:-(z::Hyperbolic) = Hyperbolic(-z.a, -z.b)
 """
     *(z1::Hyperbolic, z2::Hyperbolic)
 
-Hyperbolic multiplication using `h^2 = 1`.
+Hyperbolic multiplication using `hy^2 = 1`.
 """
 Base.:*(z1::Hyperbolic, z2::Hyperbolic) =
     Hyperbolic(z1.a*z2.a + z1.b*z2.b,
@@ -171,16 +184,17 @@ abs(z::Hyperbolic) = z.a^2 - z.b^2
 """
     inv(z::Hyperbolic)
 
-Multiplicative inverse of `z`.
-
-Throws `DivideError` if `abs(z) == 0` (zero divisors).
+Return the multiplicative inverse of `z`.
+Throws `DomainError` if `z` is a zero divisor.
 """
-Base.inv(z::Hyperbolic) = begin
+function Base.inv(z::Hyperbolic{T}) where {T}
     n = abs(z)
-    n == 0 && throw(DivideError())
-    w = conj(z)
-    Hyperbolic(w.a / n, w.b / n)
+    if iszero(n)
+        throw(DomainError(z, "Hyperbolic number is not invertible (zero divisor)"))
+    end
+    Hyperbolic(z.a/n, -z.b/n)
 end
+
 
 """
     /(z1::Hyperbolic, z2::Hyperbolic)
@@ -195,6 +209,19 @@ Base.:/(z1::Hyperbolic, z2::Hyperbolic) = z1 * inv(z2)
 Returns `true` if `z` is invertible, i.e. `abs(z) ≠ 0`.
 """
 isunit(z::Hyperbolic) = abs(z) != 0
+
+# -----------------------------
+# Mixed arithmetic with reals
+# -----------------------------
+
+Base.:+(z::Hyperbolic, x::Real) = z + Hyperbolic(x)
+Base.:+(x::Real, z::Hyperbolic) = Hyperbolic(x) + z
+Base.:-(z::Hyperbolic, x::Real) = z - Hyperbolic(x)
+Base.:-(x::Real, z::Hyperbolic) = Hyperbolic(x) - z
+Base.:*(z::Hyperbolic, x::Real) = Hyperbolic(z.a*x, z.b*x)
+Base.:*(x::Real, z::Hyperbolic) = z * x
+Base.:/(z::Hyperbolic, x::Real) = Hyperbolic(z.a/x, z.b/x)
+
 
 # ---------------------------------------------------------------------
 # Geometry and classification
