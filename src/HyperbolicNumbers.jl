@@ -12,7 +12,7 @@ module HyperbolicNumbers
 # Corrected the visualization function to resemble more the visualization of complex numbers in Julia. 
 # The hyperbolic unit is hy a bit as the imaginary unit is im in Julia
 
-export Hyperbolic, hy, conj, abs, visualize,
+export Hyperbolic, hy, visualize,
        inv, isunit, islightlike, istimelike, isspacelike,
        lorentz_inner, hyperbolic_angle
 
@@ -120,11 +120,40 @@ Base.promote_rule(::Type{S}, ::Type{Hyperbolic{T}}) where {T<:Real,S<:Real} = Hy
 # ---------------------------------------------------------------------
 
 """
-    show(io, z::Hyperbolic)
+    show(io::IO, z::Hyperbolic)
 
-Pretty-print as `a + b*hy`.
+Pretty-print a hyperbolic number.
+
+Formatting rules:
+- `a + b*hy` if `b > 0`
+- `a - |b|*hy` if `b < 0`
+- `a` if `b == 0`
+- suppresses coefficient `1` in `h`
 """
-Base.show(io::IO, z::Hyperbolic) = print(io, "$(z.a) + $(z.b)hy")
+function Base.show(io::IO, z::Hyperbolic)
+    a, b = z.a, z.b
+
+    # Purely real
+    if iszero(b)
+        print(io, a)
+        return
+    end
+
+    # Determine sign and coefficient
+    sign = b < 0 ? " - " : " + "
+    coeff = abs(b)
+
+    # Print real part (even if zero)
+    print(io, a, sign)
+
+    # Print hyperbolic part
+    if coeff == one(coeff)
+        print(io, "hy")
+    else
+        print(io, coeff, "hy")
+    end
+end
+
 
 """
     ==(z1::Hyperbolic, z2::Hyperbolic)
@@ -172,14 +201,14 @@ Base.:*(z1::Hyperbolic, z2::Hyperbolic) =
 
 Hyperbolic conjugation: `a - h*b`.
 """
-conj(z::Hyperbolic) = Hyperbolic(z.a, -z.b)
+Base.conj(z::Hyperbolic) = Hyperbolic(z.a, -z.b)
 
 """
     abs(z::Hyperbolic)
 
 Quadratic (Minkowski) norm: `a^2 - b^2`.
 """
-abs(z::Hyperbolic) = z.a^2 - z.b^2
+Base.abs(z::Hyperbolic) = z.a^2 - z.b^2
 
 """
     inv(z::Hyperbolic)

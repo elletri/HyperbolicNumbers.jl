@@ -2,7 +2,7 @@
 
 A Julia package for **hyperbolic (split-complex) numbers** of the form
 
-[ z = a + h b, \quad h^2 = 1 ]
+[ z = a + b hy, hy^2 = 1 with hy ≠ ±1]
 
 This package provides a mathematically rigorous and Julia-idiomatic implementation of hyperbolic numbers, including algebraic operations, geometric (Minkowski) interpretation, and plotting support.
 
@@ -33,7 +33,7 @@ pkg> add https://github.com/elletri/HyperbolicNumbers.jl
 For local development:
 
 ```julia
-pkg> dev https://github.com/elletri/HyperbolicNumbers.jl
+pkg> dev path="/path/to/HyperbolicNumbers"
 ```
 
 ---
