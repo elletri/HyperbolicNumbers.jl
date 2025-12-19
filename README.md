@@ -154,21 +154,12 @@ pkg> test HyperbolicNumbers
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome. Please:
-
-* add tests for new features
-* document all public functions
-* keep mathematical behavior explicit
-
----
 
 ## 🙏 Acknowledgements
 
 This package was developed with the assistance of OpenAI's ChatGPT, which was used as a programming and documentation aid during development. All design choices, mathematical interpretations, and any remaining errors are the sole responsibility of the author.
 
-Info on hyperbolic numbers in Julia is also in https://doi.org/10.48550/arXiv.2301.01707
+Info on hyperbolic numbers in Julia can be also found in https://doi.org/10.48550/arXiv.2301.01707
 
 ---
 
